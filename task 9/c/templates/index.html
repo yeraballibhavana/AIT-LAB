@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhavana's Personal Chatbot Assistant</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #000000;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #000000;
+            font-size: 24px;
+        }
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #ffffff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #000000;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .user-message {
+            background: #000000;
+            color: #ffffff;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .bot-message {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+        .input-container {
+            display: flex;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #000000;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #000000;
+            font-size: 16px;
+        }
+        #user-input::placeholder {
+            color: #666666;
+        }
+        #send-btn {
+            padding: 10px 20px;
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #000000;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        #send-btn:hover {
+            background: #f0f0f0;
+        }
+        .typing {
+            display: none;
+            font-style: italic;
+            color: #000000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Bhavana's Personal Chatbot Assistant
+        </div>
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-message">
+                I'm Bhavana's personal chatbot assistant. Respond helpfully, personally, and warmly as if you are assisting Bhavana directly.
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+            <button id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+        <div class="typing" id="typing">Assistant is typing...</div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            addMessage('user', message);
+            userInput.value = '';
+
+            // Show typing indicator
+            document.getElementById('typing').style.display = 'block';
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide typing indicator
+                document.getElementById('typing').style.display = 'none';
+                addMessage('bot', data.response);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('typing').style.display = 'none';
+                addMessage('bot', 'Sorry, there was an error processing your message.');
+            });
+        }
+
+        function addMessage(sender, message) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
